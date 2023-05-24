@@ -30,13 +30,30 @@ async def root():
 @app.get("/available-gardu-induk", response_model=gardu_induk.ReadGarduInduk)
 async def gardu_induk_list(db: Session = Depends(get_db)):
     result = crud_gardu_induk.get_gardu_induk(db)
-    print(result)
 
     data = {
         "available": result,
     }
 
     return gardu_induk.ReadGarduInduk(**data)
+
+
+@app.get("/gardu-induk-location", response_model=gardu_induk.GarduIndukLocation)
+async def gardu_induk_location(area_name: str, db: Session = Depends(get_db)):
+    result = crud_gardu_induk.get_gardu_induk_location(db, gi_name=area_name)
+
+    if not result:
+        result["x"] = 0
+        result["y"] = 0
+
+    data = {
+        "GI": area_name,
+        "latitude": result["y"],
+        "longitude": result["x"],
+    }
+
+
+    return gardu_induk.GarduIndukLocation(**data)
 
 
 @app.get("/area", response_model=area.ReadArea)

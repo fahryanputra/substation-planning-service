@@ -16,3 +16,9 @@ class GarduIndukBase(BaseModel):
 
 class ReadGarduInduk(BaseModel):
     available: list[str]
+
+
+class GarduIndukLocation(BaseModel):
+    GI: str
+    latitude: float
+    longitude: float
