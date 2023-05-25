@@ -17,4 +17,7 @@ class GarduBase(BaseModel):
     gps_y: float
     status_rc: str
     fungsi_gar: str
-    geometry: Geometry
+    # geometry: Geometry
+
+class GarduList(BaseModel):
+    gardu: list[GarduBase]

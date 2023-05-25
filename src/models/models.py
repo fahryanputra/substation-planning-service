@@ -19,7 +19,7 @@ class BtsArea(Base):
     geometry = Column(Geometry(srid=4326, from_text='ST_GeomFromEWKT', name='geometry'), index=True)
 
 
-class Gardu(Base):
+class GarduDistribusi(Base):
     __tablename__ = 'gardu'
 
     id = Column(BigInteger, primary_key=True)

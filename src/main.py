@@ -4,8 +4,8 @@ from sqlalchemy.orm import Session
 from .config import Settings
 from .database import SessionLocal, engine
 from .models import models
-from .crud import crud_region, crud_gardu_induk
-from .schemas import area, gardu_induk
+from .crud import crud_gardu_distribusi, crud_region, crud_gardu_induk
+from .schemas import area, gardu_distribusi, gardu_induk
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -54,6 +54,17 @@ async def gardu_induk_location(area_name: str, db: Session = Depends(get_db)):
 
 
     return gardu_induk.GarduIndukLocation(**data)
+
+
+@app.get("/gardu-distribusi", response_model=gardu_distribusi.GarduList)
+async def gardu_distribusi_list(gardu: str | None = None, nama_area: str | None = None, limit: int = 10, db: Session = Depends(get_db)):
+    result = crud_gardu_distribusi.get_gardu(db, gardu, nama_area, limit)
+
+    data = {
+        "gardu": result,
+    }
+    
+    return gardu_distribusi.GarduList(**data)
 
 
 @app.get("/area", response_model=area.ReadArea)
