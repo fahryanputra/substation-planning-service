@@ -57,7 +57,7 @@ async def gardu_induk_location(area_name: str, db: Session = Depends(get_db)):
 
 
 @app.get("/gardu-distribusi", response_model=gardu_distribusi.GarduList)
-async def gardu_distribusi_list(gardu: str | None = None, nama_area: str | None = None, limit: int = 10, db: Session = Depends(get_db)):
+async def gardu_distribusi_list(gardu: str = None, nama_area: str = None, limit: int = 10, db: Session = Depends(get_db)):
     result = crud_gardu_distribusi.get_gardu(db, gardu, nama_area, limit)
 
     data = {
