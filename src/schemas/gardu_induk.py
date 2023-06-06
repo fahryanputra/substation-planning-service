@@ -22,3 +22,7 @@ class GarduIndukLocation(BaseModel):
     GI: str
     latitude: float
     longitude: float
+
+
+class AllGardu(BaseModel):
+    gardu_induk: list[GarduIndukBase]

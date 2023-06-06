@@ -27,6 +27,28 @@ async def root():
     return {"message": "Hello World"}
 
 
+@app.get("/all-gardu-induk", response_model=gardu_induk.AllGardu)
+async def all_gardu_induk_list(db: Session = Depends(get_db)):
+    result = crud_gardu_induk.get_all_gardu_induk(db)
+
+    print(result)
+
+    data = {
+        "gardu_induk": result,
+    }
+    return gardu_induk.AllGardu(**data)
+
+
+@app.get("/all-gardu-distribusi", response_model=gardu_distribusi.AllGardu)
+async def all_gardu_distribusi_list(db: Session = Depends(get_db)):
+    result = crud_gardu_distribusi.get_all_gardu(db)
+
+    data = {
+        "gardu": result,
+    }
+    return gardu_distribusi.AllGardu(**data)
+
+
 @app.get("/available-gardu-induk", response_model=gardu_induk.ReadGarduInduk)
 async def gardu_induk_list(db: Session = Depends(get_db)):
     result = crud_gardu_induk.get_gardu_induk(db)

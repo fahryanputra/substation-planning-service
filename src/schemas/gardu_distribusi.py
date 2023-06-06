@@ -21,3 +21,7 @@ class GarduBase(BaseModel):
 
 class GarduList(BaseModel):
     gardu: list[GarduBase]
+
+
+class AllGardu(BaseModel):
+    gardu: list[GarduBase]
