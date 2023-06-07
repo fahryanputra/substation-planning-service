@@ -50,7 +50,7 @@ async def all_gardu_distribusi_list(db: Session = Depends(get_db)):
 
 
 @app.get("/available-gardu-induk", response_model=gardu_induk.ReadGarduInduk)
-async def gardu_induk_list(db: Session = Depends(get_db)):
+async def gardu_induk_name_list(db: Session = Depends(get_db)):
     result = crud_gardu_induk.get_gardu_induk(db)
 
     data = {
@@ -79,8 +79,8 @@ async def gardu_induk_location(area_name: str, db: Session = Depends(get_db)):
 
 
 @app.get("/gardu-distribusi", response_model=gardu_distribusi.GarduList)
-async def gardu_distribusi_list(gardu: str = None, nama_area: str = None, limit: int = 10, db: Session = Depends(get_db)):
-    result = crud_gardu_distribusi.get_gardu(db, gardu, nama_area, limit)
+async def gardu_distribusi_list(gardu: str = None, nama_area: str = None, nama_gi: str = None, limit: int = 10, db: Session = Depends(get_db)):
+    result = crud_gardu_distribusi.get_gardu(db, gardu, nama_area, nama_gi, limit)
 
     data = {
         "gardu": result,
