@@ -24,7 +24,7 @@ def get_db():
 
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {"status": "Server is up"}
 
 
 @app.get("/all-gardu-induk", response_model=gardu_induk.AllGardu)
