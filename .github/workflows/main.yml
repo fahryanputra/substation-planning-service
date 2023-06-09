@@ -10,12 +10,19 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - name: install ssh keys
+    - name: deploy
+      env:
+          PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY  }}
+          HOSTNAME : ${{ secrets.HOSTNAME  }}
+          USER_NAME : ${{ secrets.USER_NAME  }}
       run: |
-        install -m 600 -D /dev/null ~/.ssh/id_ed25519
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
-        ssh-keyscan -H ${{ secrets.SSH_HOST }} > ~/.ssh/known_hosts
-    - name: connect and pull
-      run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && git checkout ${{ secrets.MAIN_BRANCH }} && git pull && sudo systemctl restart substation && exit"
+        echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+        ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} -p 1026 '
+          cd ${{ secrets.WORK_DIR }} &&
+          git checkout ${{ secrets.MAIN_BRANCH }} &&
+          git pull origin ${{ secrets.MAIN_BRANCH }} &&
+          sudo systemctl restart substation &&
+          exit
+        '
     - name: cleanup
       run: rm -rf ~/.ssh
