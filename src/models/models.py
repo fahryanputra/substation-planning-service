@@ -56,9 +56,9 @@ class RegionGI(Base):
     __tablename__ = 'gardu_induk_region'
 
     id = Column(BigInteger, primary_key=True)
-    GI = Column(Text)
+    # GI = Column(Text)
     calc_method = Column(Text)
-    geometry = Column(Geometry('POLYGON', 4326, from_text='ST_GeomFromEWKT', name='geometry'), index=True)
+    geometry = Column(Text)
 
 
 t_geography_columns = Table(

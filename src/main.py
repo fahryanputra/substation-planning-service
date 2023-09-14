@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from .config import Settings
@@ -88,10 +88,16 @@ async def gardu_distribusi_list(gardu: str = None, nama_area: str = None, nama_g
     
     return gardu_distribusi.GarduList(**data)
 
+@app.post("/area", response_model=area.CreateArea)
+async def create_area(calc_method:str, db: Session = Depends(get_db)):
+    db_area = crud_region.get_area_by_name(db, calc_method)
+    if db_area:
+        raise HTTPException(status_code=400, detail="Method already exists")
+    return crud_region.create_area(db=db, calc_method=calc_method)
 
 @app.get("/area", response_model=area.ReadArea)
 async def main_substation_area(method: str, area_name: str, db: Session = Depends(get_db)):
-    area_result = crud_region.calculate_gi_region(db, gi_name=area_name, calc_method=method)
+    area_result = crud_region.get_area(db, gi_name=area_name, calc_method=method)
 
     data = {
         "GI": area_name,
