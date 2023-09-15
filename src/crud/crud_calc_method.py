@@ -48,16 +48,41 @@ def __get_gi_region(db:Session, calc_method:str):
     else:
         raise HTTPException(status_code=400, detail="Method not available")
     
-def get_area_by_name(db: Session, calc_method: str):
+def __get_calc_method_by_id(db: Session, id: int):
+    return db.query(models.RegionGI).filter(models.RegionGI.id == id).first()
+
+def get_calc_method_by_name(db: Session, calc_method: str):
     return db.query(models.RegionGI).filter(models.RegionGI.calc_method == calc_method).first()
 
-def create_area(db: Session, calc_method: str):
+def create_calc_method(db: Session, calc_method: str):
     db_geom = __get_gi_region(db=db, calc_method=calc_method)
     db_area = models.RegionGI(calc_method = calc_method, geometry = geojson.dumps(db_geom))
     db.add(db_area)
     db.commit()
     db.refresh(db_area)
     return db_area
+
+def get_all_calc_method(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(models.RegionGI.id, models.RegionGI.calc_method).offset(skip).limit(limit).all()
+
+def update_calc_method(db: Session, id: int):
+    old_calc_method =  __get_calc_method_by_id(db, id=id)
+    if old_calc_method is None:
+        raise HTTPException(status_code=400, detail=f'Calculation method with the id {id} is not found')
+    new_db_geom = __get_gi_region(db=db, calc_method=old_calc_method.calc_method)
+    old_calc_method.calc_method = old_calc_method.calc_method
+    old_calc_method.geometry = geojson.dumps(new_db_geom)
+    db.add(old_calc_method)
+    db.commit()
+    return {"code":"success","message":f"calculation method {old_calc_method.calc_method} geometry updated"}
+
+def delete_calc_method(db: Session, id: int):
+    selected_calc_method =  __get_calc_method_by_id(db, id=id)
+    if selected_calc_method is None:
+        raise HTTPException(status_code=400, detail=f'Calculation method with the id {id} is not found')
+    db.delete(selected_calc_method)
+    db.commit()
+    return {"code":"success","message":f"calculation method {selected_calc_method.calc_method} deleted"}
         
 def get_area(db: Session, gi_name: str, calc_method: str):
     result = None

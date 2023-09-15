@@ -1,1 +1,1 @@
-from src.crud import crud_region
+from src.crud import crud_calc_method

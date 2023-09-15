@@ -4,8 +4,8 @@ from sqlalchemy.orm import Session
 from .config import Settings
 from .database import SessionLocal, engine
 from .models import models
-from .crud import crud_gardu_distribusi, crud_region, crud_gardu_induk
-from .schemas import area, gardu_distribusi, gardu_induk
+from .crud import crud_calc_method, crud_gardu_distribusi, crud_gardu_induk
+from .schemas import area, gardu_distribusi, gardu_induk, calc_method
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -88,24 +88,41 @@ async def gardu_distribusi_list(gardu: str = None, nama_area: str = None, nama_g
     
     return gardu_distribusi.GarduList(**data)
 
-@app.post("/area", response_model=area.CreateArea)
-async def create_area(calc_method:str, db: Session = Depends(get_db)):
-    db_area = crud_region.get_area_by_name(db, calc_method)
-    if db_area:
-        raise HTTPException(status_code=400, detail="Method already exists")
-    return crud_region.create_area(db=db, calc_method=calc_method)
-
 @app.get("/area", response_model=area.ReadArea)
 async def main_substation_area(method: str, area_name: str, db: Session = Depends(get_db)):
-    area_result = crud_region.get_area(db, gi_name=area_name, calc_method=method)
+    area_result = crud_calc_method.get_area(db, gi_name=area_name, calc_method=method)
 
     data = {
         "GI": area_name,
         "area": area_result,
     }
-
     return area.ReadArea(**data)
 
+@app.get("/calc-methods")
+async def all_calc_method_list(db: Session = Depends(get_db)):
+    result = crud_calc_method.get_all_calc_method(db)
+
+    print(result)
+
+    data = {
+        "methods": result,
+    }
+    return data
+
+@app.post("/calc-method", response_model=calc_method.CalcMethodBase)
+async def create_calc_method(calc_method:str, db: Session = Depends(get_db)):
+    db_calc_method = crud_calc_method.get_calc_method_by_name(db, calc_method)
+    if db_calc_method:
+        raise HTTPException(status_code=400, detail="Calculation method already exists")
+    return crud_calc_method.create_calc_method(db=db, calc_method=calc_method)
+
+@app.put("/calc-method/{id}")
+async def update_calc_method(id, db: Session = Depends(get_db)):
+    return crud_calc_method.update_calc_method(db=db, id=id)
+
+@app.delete("/calc-method/{id}")
+async def delete_calc_method(id, db: Session = Depends(get_db)):
+    return crud_calc_method.delete_calc_method(db=db, id=id)
 
 # TODO
 @app.get("/total")
