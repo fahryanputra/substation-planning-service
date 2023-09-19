@@ -4,8 +4,8 @@ from sqlalchemy.orm import Session
 from .config import Settings
 from .database import SessionLocal, engine
 from .models import models
-from .crud import crud_calc_method, crud_gardu_distribusi, crud_gardu_induk
-from .schemas import area, gardu_distribusi, gardu_induk, calc_method
+from .crud import crud_calc_method, crud_gardu_distribusi, crud_gardu_induk, crud_load_point
+from .schemas import area, gardu_distribusi, gardu_induk, calc_method, load_point
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -88,15 +88,6 @@ async def gardu_distribusi_list(gardu: str = None, nama_area: str = None, nama_g
     
     return gardu_distribusi.GarduList(**data)
 
-@app.get("/area", response_model=area.ReadArea)
-async def main_substation_area(method: str, area_name: str, db: Session = Depends(get_db)):
-    area_result = crud_calc_method.get_area(db, gi_name=area_name, calc_method=method)
-
-    data = {
-        "GI": area_name,
-        "area": area_result,
-    }
-    return area.ReadArea(**data)
 
 @app.get("/calc-methods")
 async def all_calc_method_list(db: Session = Depends(get_db)):
@@ -109,6 +100,7 @@ async def all_calc_method_list(db: Session = Depends(get_db)):
     }
     return data
 
+
 @app.post("/calc-method", response_model=calc_method.CalcMethodBase)
 async def create_calc_method(calc_method:str, db: Session = Depends(get_db)):
     db_calc_method = crud_calc_method.get_calc_method_by_name(db, calc_method)
@@ -116,27 +108,52 @@ async def create_calc_method(calc_method:str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Calculation method already exists")
     return crud_calc_method.create_calc_method(db=db, calc_method=calc_method)
 
+
 @app.put("/calc-method/{id}")
 async def update_calc_method(id, db: Session = Depends(get_db)):
     return crud_calc_method.update_calc_method(db=db, id=id)
+
 
 @app.delete("/calc-method/{id}")
 async def delete_calc_method(id, db: Session = Depends(get_db)):
     return crud_calc_method.delete_calc_method(db=db, id=id)
 
-# TODO
-@app.get("/total")
-async def load_point_total():
-    return {"message": "Endpoint Total Titik Beban"}
+
+@app.get("/area", response_model=area.ReadArea)
+async def main_substation_area(method: str, area_name: str, db: Session = Depends(get_db)):
+    area_result = crud_calc_method.get_area(db, gi_name=area_name, calc_method=method)
+
+    data = {
+        "GI": area_name,
+        "area": area_result,
+    }
+    return area.ReadArea(**data)
+
+
+@app.get("/total", response_model=load_point.ReadLoadPoint)
+async def load_point_total(gi_name: str, calc_method: str, db: Session = Depends(get_db)):
+    total_load_point = crud_load_point.get_load_points(gi_name=gi_name, calc_method=calc_method, db=db)
+    print(total_load_point)
+    data = {
+        "GI": gi_name,
+        "total_load_point": total_load_point,
+    }
+    return load_point.ReadLoadPoint(**data)
+
+
+@app.get("/density", response_model=load_point.ReadLoadDensity)
+async def main_substation_density(gi_name: str, calc_method: str, db: Session = Depends(get_db)):
+    load_point_density = crud_load_point.get_load_density(gi_name=gi_name, calc_method=calc_method, db=db)
+    print(load_point_density)
+    data = {
+        "GI": gi_name,
+        "load_point_density_per_km2": "{:.3f}".format(load_point_density),
+    }
+    return load_point.ReadLoadDensity(**data)
 
 
 # TODO
-@app.get("/capacity")
-async def load_point_capacity():
-    return {"message": "Endpoint Rekap Titik Beban"}
+# @app.get("/capacity")
+# async def load_point_capacity():
+#     return {"message": "Endpoint Rekap Titik Beban"}
 
-
-# TODO
-@app.get("/density")
-async def main_substation_density():
-    return {"message": "Endpoint Kerapatan GI"}
