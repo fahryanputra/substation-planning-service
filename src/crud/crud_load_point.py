@@ -50,3 +50,15 @@ def get_load_density(db: Session, gi_name: str, calc_method: str):
     result = load_point / area
 
     return result
+
+def get_gi_recommendation(db: Session, gi_name: str, calc_method:str):
+    selected_gi = __get_gi_area(db=db, gi_name=gi_name, calc_method=calc_method)
+    area = from_shape(selected_gi, srid=4326)
+    load_points = db.query(func.ST_Collect(models.GarduDistribusi.geometry)).filter(func.ST_Contains(area, models.GarduDistribusi.geometry))
+    result = db.query(func.ST_Centroid(load_points)).first()
+    result_x = db.query(func.ST_X(result[0])).first()
+    result_y = db.query(func.ST_Y(result[0])).first()
+    if result is None:
+        return {}
+
+    return {"x": result_x[0], "y": result_y[0]}

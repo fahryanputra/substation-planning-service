@@ -130,6 +130,23 @@ async def main_substation_area(method: str, area_name: str, db: Session = Depend
     return area.ReadArea(**data)
 
 
+@app.get("/recommendation", response_model=load_point.GIRecommendation)
+async def get_gi_recommendation(method: str, area_name: str, db: Session = Depends(get_db)):
+    result = crud_load_point.get_gi_recommendation(db=db, gi_name=area_name, calc_method=method)
+
+    if not result:
+        result["x"] = 0
+        result["y"] = 0
+
+    data = {
+        "GI": area_name,
+        "latitude": result["y"],
+        "longitude": result["x"],
+    }
+
+    return load_point.GIRecommendation(**data)
+
+
 @app.get("/total", response_model=load_point.ReadLoadPoint)
 async def load_point_total(gi_name: str, calc_method: str, db: Session = Depends(get_db)):
     total_load_point = crud_load_point.get_load_points(gi_name=gi_name, calc_method=calc_method, db=db)
